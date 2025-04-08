@@ -38,6 +38,8 @@ def getPossibleGCDs(index, value):
     return [index / (indexNCoefficient // coefficientGCD)]
 
 def recursiveSearch(index, value, depth, currPath, allPaths, prevAdditionCount, prevDivisionCount):
+    if str(value) == "15*a*n + 13":
+        max(1, 1)
     currPath.append((index, value))
     if depth <= 1:
         allPaths.append(currPath)
@@ -70,17 +72,29 @@ def recursiveSearch(index, value, depth, currPath, allPaths, prevAdditionCount, 
             if prevDivisionCount == 0:
                 divisionFactor, inverse, _ = xgcd(indexBCoefficient, possibleGCD)
                 if indexConstant % divisionFactor == 0:
-                    indexBCoefficient //= divisionFactor
-                    indexConstant //= divisionFactor
-                    newBTerm = possibleGCD * b - (indexConstant * inverse % possibleGCD)
-                    aCoefficient = ZZ(SR(nextIndex).coefficient(n, 1).coefficient(a, 1))
-                    newATerm = (lcm(aCoefficient, possibleGCD) // aCoefficient) * a
+                    newIndexBCoefficient = possibleGCD // divisionFactor
+                    newIndexConstant = indexConstant // divisionFactor
+                    newIndexBTerm = newIndexBCoefficient * b - (newIndexConstant * inverse % possibleGCD)
+                    newIndexACoefficient = ZZ(SR(nextIndex).coefficient(n, 1).coefficient(a, 1))
+                    newIndexATerm = (lcm(newIndexACoefficient, possibleGCD) // newIndexACoefficient) * a
                     updatedNextIndex = nextIndex(b = newBTerm)(a = newATerm)
-                    nextValue = updatedNextIndex / possibleGCD
-                    nextCurrPath = []
-                    for termPair in currPath:
-                        nextCurrPath.append((SR(termPair[0])(b = newBTerm)(a = newATerm), SR(termPair[1])(b = newBTerm)(a = newATerm)))
-                    recursiveSearch(updatedNextIndex, nextValue, depth - 1, nextCurrPath, allPaths, 0, 1)
+                    
+                    divisionFactor, inverse, _ = xgcd(newIndexBCoefficient * valueBCoefficient, possibleGCD)
+                    if valueConstant % divisionFactor == 0:
+                        newValueBCoefficient = possibleGCD // divisionFactor
+                        newValueConstant = indexConstant // divisionFactor
+                        newValueBTerm = newIndexBCoefficient * b - (newIndexConstant * inverse % possibleGCD)
+                        newValueACoefficient = ZZ(SR(nextIndex).coefficient(n, 1).coefficient(a, 1))
+                        newIndexATerm = (lcm(newIndexACoefficient, possibleGCD) // newIndexACoefficient) * a
+
+                        
+                        nextValue = updatedNextIndex / possibleGCD
+                        nextCurrPath = []
+                        for termPair in currPath:
+                            nextCurrPathIndex = SR(termPair[0])(b = newIndexBTerm)(a = newATerm)
+                            nextCurrPathValue = SR(termPair[1])(b = newIndexBTerm)(a = newATerm)
+                            nextCurrPath.append((nextCurrPathIndex, nextCurrPathValue))
+                        recursiveSearch(updatedNextIndex, nextValue, depth - 1, nextCurrPath, allPaths, 0, 1)
 
 
 
@@ -110,8 +124,8 @@ def printTable(table, termLength, termsPerLine):
         printNElements(len(table) % termsPerLine, len(table) - len(table) % termsPerLine, table, termLength)
 
 allPaths = []
-depth = 3
-recursiveSearch(6*a*n + 2, 3, depth, [], allPaths, 0, 0)
+depth = 11
+recursiveSearch(12*a*n, 2, depth, [], allPaths, 0, 0)
 print('*' * 100)
 for path in allPaths:
     printTable(path, 18, 5)
